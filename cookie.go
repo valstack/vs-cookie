@@ -71,6 +71,10 @@ func (s *managerStore) Update(ctx context.Context, sid string, expired int64) (s
 	}
 	cookie.Expires = time.Now().Add(time.Duration(expired) * time.Second)
 	cookie.MaxAge = int(expired)
+	cookie.Path = "/"
+	cookie.HttpOnly = true
+	cookie.Secure = true
+	cookie.SameSite = http.SameSiteStrictMode
 	http.SetCookie(res, cookie)
 
 	var values map[string]interface{}
@@ -97,6 +101,8 @@ func (s *managerStore) Delete(ctx context.Context, sid string) error {
 	cookie := &http.Cookie{
 		Name:     s.opts.cookieName,
 		Path:     "/",
+		SameSite: http.SameSiteStrictMode,
+		Secure:   true,
 		HttpOnly: true,
 		Expires:  time.Now(),
 		MaxAge:   -1,
@@ -232,7 +238,8 @@ func (s *store) Save() error {
 		Name:     s.opts.cookieName,
 		Value:    encoded,
 		Path:     "/",
-		Secure:   s.opts.secure,
+		SameSite: http.SameSiteStrictMode,
+		Secure:   true,
 		HttpOnly: true,
 		MaxAge:   int(s.expired),
 		Expires:  time.Now().Add(time.Duration(s.expired) * time.Second),
